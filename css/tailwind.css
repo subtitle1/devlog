@@ -22,8 +22,40 @@
   @apply my-5;
 }
 
+.horizontal-underline {
+  border-bottom-width: 0;
+  background-image: linear-gradient(transparent, transparent), linear-gradient(#de1d8d, #de1d8d);
+  background-size: 0% 5px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.5s ease-in-out;
+}
+
+.horizontal-underline:hover {
+  background-size: 100% 5px;
+  background-position: 0 100%;
+}
+
+.horizontal-underline-active {
+  background-size: 100% 5px;
+  background-position: 0 100%;
+}
+
 /* https://stackoverflow.com/questions/61083813/how-to-avoid-internal-autofill-selected-style-to-be-applied */
 input:-webkit-autofill,
 input:-webkit-autofill:focus {
   transition: background-color 600000s 0s, color 600000s 0s;
+}
+
+body::-webkit-scrollbar {
+  width: 13px;
+}
+
+body::-webkit-scrollbar-thumb {
+  border-radius: 50px;
+  background: #d4d4d4;
+}
+
+body::-webkit-scrollbar-track {
+  background: #eeeeee;
 }

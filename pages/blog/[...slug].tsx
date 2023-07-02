@@ -24,16 +24,16 @@ export const getStaticProps = async ({ params }) => {
   const nextContent = sortedPosts[postIndex - 1] || null
   const next = nextContent ? coreContent(nextContent) : null
   const post = sortedPosts.find((p) => p.slug === slug)
-  const authorList = post.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults)
-  })
+  // const authorList = post.authors || ['default']
+  // const authorDetails = authorList.map((author) => {
+  //   const authorResults = allAuthors.find((p) => p.slug === author)
+  //   return coreContent(authorResults)
+  // })
 
   return {
     props: {
       post,
-      authorDetails,
+      // authorDetails,
       prev,
       next,
     },
@@ -42,7 +42,7 @@ export const getStaticProps = async ({ params }) => {
 
 export default function BlogPostPage({
   post,
-  authorDetails,
+  // authorDetails,
   prev,
   next,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
@@ -63,7 +63,7 @@ export default function BlogPostPage({
           content={post}
           MDXComponents={MDXComponents}
           toc={post.toc}
-          authorDetails={authorDetails}
+          // authorDetails={authorDetails}
           prev={prev}
           next={next}
         />

@@ -12,13 +12,13 @@ const Header = () => {
   const pathName = usePathname();
 
   return (
-    <header className="sticky top-0 flex items-center justify-between py-10 backdrop-blur-sm">
+    <header className="sticky top-0 backdrop-blur-sm flex items-center justify-between py-10">
       <div>
         <Link href="/" aria-label={siteMetadata.headerTitle}>
           <div className="flex items-center justify-between">
             <div
                 className={classNames(
-                  'horizontal-underline hidden text-3xl font-extrabold sm:block',
+                  'horizontal-underline italic hidden text-3xl font-extrabold sm:block',
                   {
                     'horizontal-underline-active': pathName === '/',
                   }

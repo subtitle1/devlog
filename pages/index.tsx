@@ -25,12 +25,12 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
       <PageSEO title={siteMetadata.title} description={siteMetadata.description} />
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-          {/* <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-            
+          <h1 className="font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14">
+            안녕하세요! 🖐️
           </h1>
-          <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-            
-          </p> */}
+          <p className="text-base leading-7 text-gray-500 dark:text-gray-400">
+            개발 및 취미로 하는 블로그입니다
+          </p>
         </div>
         <div className="mx-auto my-12 grid max-w-xl grid-cols-1 justify-between gap-y-20 lg:max-w-none lg:grid-cols-2">
           <ul className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -38,7 +38,7 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
             {posts.slice(0, MAX_DISPLAY).map((post) => {  const { slug, date, title, summary, tags } = post
               return (
                 <li key={post.slug} className="py-12">
-                  <article className="group relative  flex-col items-start">
+                  <article className="group flex-col items-start">
                     <div className="space-y-2 rounded-3xl p-7 hover:bg-gray-100 dark:hover:bg-gray-800 xl:grid xl:items-baseline xl:space-y-0">
                       <dl>
                         <dt className="sr-only">Published on</dt>
@@ -46,33 +46,24 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
                           <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
                         </dd>
                       </dl>
-                      <div className="space-y-5 xl:col-span-3">
-                        <div className="space-y-6">
+                      <div className="space-y-3 xl:col-span-3">
+                        <div className="">
                           <div>
                             <Link href={`/blog/${slug}`}>
-                              <span className="relative font-bold leading-8 tracking-tight text-gray-900 dark:text-gray-100">
+                              <span className="relative text-justify text-lg font-bold leading-8 tracking-tight text-gray-900 dark:text-gray-100">
                                 {title}
                               </span>
                             </Link>
-                             <div className="flex flex-wrap">
-                              {tags.map((tag) => (
-                                <Tag key={tag} text={tag} />
-                              ))}
-                            </div>
                           </div>
-                          <div className="text-justify text-sm text-gray-500 dark:text-gray-400">
+                          <div className="text-justify text-gray-500 dark:text-gray-400">
                             {summary}
                           </div>
+                            <div className="flex flex-wrap mt-2">
+                            {tags.map((tag) => (
+                              <Tag key={tag} text={tag} />
+                            ))}
+                          </div>
                         </div>
-                        {/* <div className="text-base font-medium leading-6">
-                            <Link
-                              href={`/blog/${slug}`}
-                              className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-                              aria-label={`Read "${title}"`}
-                            >
-                              Read more &rarr;
-                            </Link>
-                          </div> */}
                       </div>
                     </div>
                   </article>
@@ -88,23 +79,6 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
           </div>
         </div>
       </div>
-
-      {/* {posts.length > MAX_DISPLAY && (
-        <div className="flex justify-end text-base font-medium leading-6">
-          <Link
-            href="/blog"
-            className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-            aria-label="All posts"
-          >
-            All Posts &rarr;
-          </Link>
-        </div>
-      )} */}
-      {/* {siteMetadata.newsletter.provider && (
-      <div className="flex items-center justify-center pt-4">
-        <NewsletterForm />
-      </div>
-    )} */}
     </>
   )
 }

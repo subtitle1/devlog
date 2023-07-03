@@ -26,7 +26,7 @@ module.exports = {
         '8.5xl': '7rem',
       },
       fontFamily: {
-        sans: ['Mukta', ...defaultTheme.fontFamily.sans],
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       gradientColorStops: {
         'gradient-1-start': '#F20089',
@@ -102,11 +102,12 @@ module.exports = {
           css: {
             color: theme('colors.gray.700'),
             a: {
-              color: theme('colors.gray.700'),
+              color: theme('colors.pink.500'),
               '&:hover': {
-                color: theme('colors.gray.700'),
+                color: theme('colors.pink.700'),
               },
               code: { color: theme('colors.primary.400') },
+              fontWeight: '800',
             },
             h1: {
               fontWeight: '700',
@@ -126,8 +127,8 @@ module.exports = {
               color: theme('colors.gray.900'),
             },
             code: {
-              color: theme('colors.green.500'),
-              backgroundColor: theme('colors.gray.100'),
+              color: theme('colors.pink.500'),
+              backgroundColor: theme('colors.pink.100'),
               paddingLeft: '4px',
               paddingRight: '4px',
               paddingTop: '2px',
@@ -157,7 +158,11 @@ module.exports = {
             strong: { color: theme('colors.gray.600') },
             blockquote: {
               color: theme('colors.gray.900'),
-              borderLeftColor: theme('colors.gray.200'),
+              borderLeftColor: theme('colors.pink.500'),
+              borderRadius: 3,
+              paddingBottom: 1,
+              paddingTop: 1,
+              backgroundColor: theme('colors.gray.100')
             },
           },
         },
@@ -165,9 +170,9 @@ module.exports = {
           css: {
             color: theme('colors.gray.300'),
             a: {
-              color: theme('colors.gray.300'),
+              color: theme('colors.pink.500'),
               '&:hover': {
-                color: theme('colors.gray.300'),
+                color: theme('colors.pink.700'),
               },
               code: { color: theme('colors.primary.400') },
             },

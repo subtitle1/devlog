@@ -81,7 +81,7 @@ export default function ListLayout({
           <h1 className="text-lg font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-4xl md:leading-14">
             {title}
           </h1>
-          <div className="relative max-w-lg">
+          <div className="relative">
             <label>
               <span className="sr-only">Search articles</span>
               <input

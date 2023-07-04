@@ -59,7 +59,7 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
                             {summary}
                           </div>
                             <div className="flex flex-wrap mt-2">
-                            {tags.map((tag) => (
+                            {tags?.map((tag) => (
                               <Tag key={tag} text={tag} />
                             ))}
                           </div>
@@ -75,6 +75,9 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
             <div className="flex items-center rounded-2xl border border-zinc-100 p-6 dark:border-zinc-700/40">
               <RxRocket size="23" color="#ec4899" />
               <span className="pl-2 text-sm font-semibold">Featured Projects</span>
+              <div className='flex flex-wrap mt-3 flex-auto gap-x-2'>
+
+              </div>
             </div>
           </div>
         </div>

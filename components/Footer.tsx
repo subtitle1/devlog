@@ -5,8 +5,8 @@ import SocialIcon from '@/components/social-icons'
 export default function Footer() {
   return (
     <footer>
-      <div className="flex flex-col items-end mb-8">
-        <div className="mb-3 flex gap-3 justify-between">
+      <div className="flex flex-col items-end mb-8 border-t  dark:border-gray-700">
+        <div className="mb-3 mt-4 flex gap-3 justify-between ">
           {/* <SocialIcon kind="mail" href={siteMetadata.email} /> */}
           {/* <SocialIcon kind="instagram" href={siteMetadata.instagram} /> */}
           <SocialIcon kind="github" href={siteMetadata.github} />

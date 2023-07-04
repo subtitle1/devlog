@@ -1,18 +1,14 @@
 const projectsData = [
   {
-    title: 'A Search Engine',
-    description: `What if you could look up any information in the world? Webpages, images, videos
-    and more. Google has many features to help you find exactly what you're looking
-    for.`,
-    imgSrc: '/static/images/google.png',
-    href: 'https://www.google.com',
+    title: 'HTA-CINEMA',
+    description: `MEGABOX Clone (HTML5, CSS3, bootstrap5, JSP, jQuery, Java, JavaScript, SpringBoot, lombok, Oracle)`,
+    imgSrc: '/static/images/projects-thumb/HTA-CINEMA.jpg',
+    href: '/blog/the-time-machine',
   },
   {
-    title: 'The Time Machine',
-    description: `Imagine being able to travel back in time or to the future. Simple turn the knob
-    to the desired date and press "Go". No more worrying about lost keys or
-    forgotten headphones with this simple yet affordable solution.`,
-    imgSrc: '/static/images/time-machine.jpg',
+    title: 'Git blog (v-1)',
+    description: `첫번째 블로그 (HTML, CSS, JAVSCRTIPC, RUBY)`,
+    imgSrc: '/static/images/projects-thumb/git-blog.png',
     href: '/blog/the-time-machine',
   },
 ]

@@ -162,6 +162,7 @@ module.exports = {
               borderRadius: 3,
               paddingBottom: 1,
               paddingTop: 1,
+              paddingRight: 1,
               backgroundColor: theme('colors.gray.100')
             },
           },

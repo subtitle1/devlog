@@ -6,6 +6,7 @@ import type { Blog } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
+import SocialIcon from '@/components/social-icons'
 
 interface PaginationProps {
   totalPages: number
@@ -78,7 +79,7 @@ export default function ListLayout({
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="space-y-2 pb-8 md:space-y-5">
-          <h1 className="text-lg font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-4xl md:leading-14">
+          <h1 className="text-lg font-extrabold pt-6 leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-4xl md:leading-14">
             {title}
           </h1>
           <div className="relative">
@@ -114,7 +115,7 @@ export default function ListLayout({
             const { path, date, title, summary, tags } = post
             return (
               <li key={path} className="py-4">
-                <article className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
+                <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
                   <dl>
                     <dt className="sr-only">Published on</dt>
                     <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
@@ -122,22 +123,24 @@ export default function ListLayout({
                     </dd>
                   </dl>
                   <div className='space-y-3 xl:col-span-3 rounded-3xl p-7 hover:bg-gray-100 dark:hover:bg-gray-800'>
-                    <div>
-                      <Link href={`/${path}`} className="relative text-justify text-lg font-bold leading-8 tracking-tight text-gray-900 dark:text-gray-100">
+                  <div>
+                    <Link href={`/${path}`}>
+                      <p className="relative text-justify text-lg font-bold leading-8 tracking-tight text-gray-900 dark:text-gray-100">
                         {title}
-                      </Link>
-                    </div>
-                    <div className="text-justify text-gray-500 dark:text-gray-400">
-                      {summary}
-                    </div>
-                      <div className="flex flex-wrap mt-2">
-                      {tags.map((tag) => (
-                        <Tag key={tag} text={tag} />
-                      ))}
-                    </div>
+                      </p>
+                    </Link>
                   </div>
-                </article>
-              </li>
+                  <div className="text-justify text-gray-500 dark:text-gray-400">
+                    {summary}
+                  </div>
+                    <div className="flex flex-wrap mt-2">
+                    {tags.map((tag) => (
+                      <Tag key={tag} text={tag} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </li>
             )
           })}
         </ul>

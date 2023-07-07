@@ -1,15 +1,17 @@
 const projectsData = [
   {
     title: 'HTA-CINEMA',
-    description: `MEGABOX Clone (HTML5, CSS3, bootstrap5, JSP, jQuery, Java, JavaScript, SpringBoot, lombok, Oracle)`,
+    description: `MEGABOX Clone으로, Java/SpringBoot 및 Bootstrap으로 홈페이지 구현. 영화 데이터는 TMDB API로 가져왔다.`,
     imgSrc: '/static/images/projects-thumb/HTA-CINEMA.jpg',
-    href: '/blog/the-time-machine',
+    tags: ['HTML5', 'CSS3', 'JQuery', 'JavaScript', 'Java', 'SpringBoot'],
+    href: 'https://github.com/subtitle1/hta-cinema',
   },
   {
-    title: 'Git blog (v-1)',
-    description: `첫번째 블로그 (HTML, CSS, JAVSCRTIPC, RUBY)`,
+    title: 'Git blog',
+    description: `첫번째 개인용 블로그`,
     imgSrc: '/static/images/projects-thumb/git-blog.png',
-    href: '/blog/the-time-machine',
+    tags: ['HTML', 'CSS', 'JAVSCRTIPC', 'RUBY'],
+    href: 'https://github.com/subtitle1/subtitle1.github.io',
   },
 ]
 

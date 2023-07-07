@@ -155,7 +155,10 @@ module.exports = {
             'ul li > :first-child': {
               margin: 0,
             },
-            strong: { color: theme('colors.gray.600') },
+            strong: {
+              color: theme('colors.pink.500'),
+              fontWeight: '800',
+            },
             blockquote: {
               color: theme('colors.gray.900'),
               borderLeftColor: theme('colors.pink.500'),
@@ -163,7 +166,7 @@ module.exports = {
               paddingBottom: 1,
               paddingTop: 1,
               paddingRight: 1,
-              backgroundColor: theme('colors.gray.100')
+              backgroundColor: theme('colors.gray.100'),
             },
           },
         },
@@ -211,7 +214,6 @@ module.exports = {
             'ul li > :first-child': {
               margin: 0,
             },
-            strong: { color: theme('colors.gray.100') },
             thead: {
               color: theme('colors.gray.100'),
             },
@@ -220,17 +222,23 @@ module.exports = {
                 borderBottomColor: theme('colors.gray.700'),
               },
             },
+            strong: {
+              color: theme('colors.pink.500'),
+              fontWeight: '800',
+            },
             blockquote: {
-              color: theme('colors.gray.100'),
-              borderLeftColor: theme('colors.gray.700'),
+              color: theme('colors.gray.400'),
+              borderLeftColor: theme('colors.pink.500'),
+              borderRadius: 3,
+              paddingBottom: 1,
+              paddingTop: 1,
+              paddingRight: 1,
+              backgroundColor: theme('colors.gray.800'),
             },
           },
         },
       }),
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-  ],
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
 }

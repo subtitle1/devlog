@@ -3,7 +3,7 @@ const colors = require('tailwindcss/colors')
 
 module.exports = {
   mode: 'jit',
-  content: ['./pages/**/*.tsx', './components/**/*.tsx', './layouts/**/*.tsx', './lib/**/*.ts'],
+  content: ['./pages/**/*.tsx', './components/**/*.tsx', './layouts/**/*.tsx', './lib/**/*.ts', './data/**/*.mdx'],
   darkMode: 'class',
   theme: {
     extend: {
@@ -23,10 +23,18 @@ module.exports = {
         tightest: '-.075em',
       },
       fontSize: {
-        '8.5xl': '7rem',
+        fontSize: {
+          sm: '0.8rem',
+          base: '1.6rem',
+          xl: '1.25rem',
+          '2xl': '1.563rem',
+          '3xl': '1.953rem',
+          '4xl': '2.441rem',
+          '5xl': '3.052rem',
+        }
       },
       fontFamily: {
-        sans: ['Inter', ...defaultTheme.fontFamily.sans],
+        sans: ['Pretendard-Regular'],
       },
       gradientColorStops: {
         'gradient-1-start': '#F20089',

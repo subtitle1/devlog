@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  @font-face {
+    src: url(../public/static/fonts/Pretendard-Regular.woff2) format('woff2');
+    font-family: 'Pretendard-Regular';
+    font-style: normal;
+    font-weight: normal;
+    font-display: swap;
+  } 
+  @font-face {
+    src: url(../public/static/fonts/Pretendard-ExtraBold.woff2) format('woff2');
+    font-family: 'Pretendard-Bold';
+    font-style: normal;
+    font-weight: normal;
+    font-display: swap;
+  } 
+}
+
+h1, h2, a, strong {
+  font-family: 'Pretendard-Bold';
+}
+
 .task-list-item::before {
   @apply hidden;
 }

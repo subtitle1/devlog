@@ -39,7 +39,7 @@ export default function PostCard({ post }) {
                         </Link>
                       </div>
                       <div className="text-justify text-gray-500 dark:text-gray-400">{summary}</div>
-                      <div className="mt-2 flex flex-wrap">
+                      <div className="flex flex-wrap">
                         {tags?.map((tag) => (
                           <Tag key={tag} text={tag} />
                         ))}

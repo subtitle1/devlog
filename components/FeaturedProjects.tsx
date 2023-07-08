@@ -13,7 +13,7 @@ const itemVariants = {
 export default function FeaturedProjects() {
   return (
     <MotionLayout>
-      <div className="my-10 space-y-10 lg:pl-16 xl:pl-24">
+      <div className="my-10 space-y-10 xl:pl-16">
         <div className="rounded-2xl border border-zinc-100 p-6 dark:border-zinc-700/40">
           <div className="flex items-center">
             <RxRocket size="23" color="#ec4899" />

@@ -13,14 +13,14 @@ export default function FeaturedProjects() {
         <div className="mt-5">
           <ol>
             {projectsData.map((data) => (
-              <li className="my-3">
+              <li className="my-3" key={data.href}>
                 <dl className="mt-3 flex flex-auto flex-wrap gap-x-2">
                   <dd className="w-full flex-none text-sm font-medium text-zinc-900 dark:text-zinc-100">
                     <div className="flex items-center justify-between">
                       <span className="mt-1 flex w-full text-sm text-zinc-500 dark:text-zinc-400">
                         {data.title}
                       </span>
-                      <SocialIcon className="items-center" kind="link" href={data.href} size={5} />
+                      <SocialIcon kind="link" href={data.href} size={5} />
                     </div>
                   </dd>
                   {/* <dd className='flex-none w-full mt-1 text-sm text-zinc-500 dark:text-zinc-400'>
@@ -29,7 +29,7 @@ export default function FeaturedProjects() {
                 </dl>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {data.tags.map((tag) => (
-                    <small className="rounded-2xl bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-800 dark:bg-zinc-600 dark:text-zinc-300">
+                    <small key={tag} className="rounded-2xl bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-800 dark:bg-zinc-600 dark:text-zinc-300">
                       {tag}
                     </small>
                   ))}

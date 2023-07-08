@@ -5,14 +5,8 @@ import { InferGetStaticPropsType } from 'next'
 // import { NewsletterForm } from 'pliny/ui/NewsletterForm'
 import { allBlogs } from 'contentlayer/generated'
 import type { Blog } from 'contentlayer/generated'
-import { RxRocket } from 'react-icons/rx'
-import Link from 'next/link'
-import Tag from '@/components/Tag'
-import { formatDate } from 'pliny/utils/formatDate'
-
 import FeaturedProjects from '@/components/FeaturedProjects'
-
-const MAX_DISPLAY = 5
+import PostCard from '@/components/PostCard'
 
 export const getStaticProps = async () => {
   const sortedPosts = sortedBlogPost(allBlogs) as Blog[]
@@ -35,56 +29,10 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
           </p>
         </div> */}
         <div className="mx-auto grid max-w-xl grid-cols-1 justify-between gap-y-20 lg:max-w-none lg:grid-cols-2">
-          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-            {!posts.length && 'No posts found.'}
-            {posts.slice(0, MAX_DISPLAY).map((post) => {  const { slug, date, title, summary, tags } = post
-              return (
-                <li key={post.slug} className="py-12">
-                  <div className="group flex-col items-start">
-                    <div className="space-y-2 rounded-3xl p-7 hover:bg-gray-100 dark:hover:bg-gray-800 xl:grid xl:items-baseline xl:space-y-0">
-                      <dl>
-                        <dt className="sr-only">Published on</dt>
-                        <dd className="text-sm font-medium leading-6 text-gray-500 dark:text-gray-400">
-                          <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
-                        </dd>
-                      </dl>
-                      <div className="space-y-3 xl:col-span-3">
-                        <div className="">
-                          <div>
-                          <Link href={`/blog/${slug}`}>
-                              <span className="relative text-justify text-lg font-bold leading-8 tracking-tight text-gray-900 dark:text-gray-100">
-                                {title}
-                              </span>
-                          </Link>  
-                          </div>
-                          <div className="text-justify text-gray-500 dark:text-gray-400">
-                            {summary}
-                          </div>
-                            <div className="flex flex-wrap mt-2">
-                            {tags?.map((tag) => (
-                              <Tag key={tag} text={tag} />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-          <div className="my-10 space-y-10 lg:pl-16 xl:pl-24">
-            <div className="rounded-2xl border border-zinc-100 p-6 dark:border-zinc-700/40">
-              <div className='flex items-center'>
-                <RxRocket size="23" color="#ec4899" />
-                <span className="pl-2 text-sm font-semibold">Featured Projects</span>
-              </div>
-              <FeaturedProjects/>
-            </div>
-          </div>
+          <PostCard post={posts} />
+          <FeaturedProjects />
         </div>
       </div>
     </>
   )
 }
-

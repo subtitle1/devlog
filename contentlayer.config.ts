@@ -17,6 +17,7 @@ import rehypeKatex from 'rehype-katex'
 import rehypeCitation from 'rehype-citation'
 import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
+import rehypePrettyCode from 'rehype-pretty-code'
 
 const root = process.cwd()
 
@@ -90,11 +91,18 @@ export default makeSource({
     ],
     rehypePlugins: [
       rehypeSlug,
+      [
+        rehypePrettyCode,
+        {
+          theme: 'github-light',
+        },
+      ],
       rehypeAutolinkHeadings,
       rehypeKatex,
       [rehypeCitation, { path: path.join(root, 'data') }],
       [rehypePrismPlus, { ignoreMissing: true }],
       rehypePresetMinify,
+      rehypePrettyCode,
     ],
   },
 })

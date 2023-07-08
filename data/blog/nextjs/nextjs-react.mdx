@@ -1,0 +1,53 @@
+---
+title: Next.js와 React
+date: '2023-07-02'
+tags: ['next js', 'react', 'Hybrid', 'Hydration']
+draft: false
+summary: '리액트 프레임워크 next.js와 리액트에 대하여'
+---
+
+## Next.js란?
+
+웹 애플리케이션을 만들기 위한 리액트 프레임워크로, Next.js는 `리액트로 웹앱을 개발`하는데 리액트만으로는 힘든, 많은 것들을 가능하게 해 주는 프레임워크이다.
+
+> **React?**
+>
+> 컴포넌트 단위로 ui를 손쉽게 만들어 나갈 수 있는 자바스크립트 라이브러리로, **SPA**(Single page Application)의 페이지, 하나의 어플리케이션 내에서 **필요한 부분만 즉각적으로 업데이트** 해 준다
+
+---
+
+## library vs framwork
+
+- **라이브러리**는 무언가를 만드는 데 유용한 툴 같은 개념
+  - 리액트와 같이 UI, 상태 관리(State Management), Routing과 같은 **작고 사소한 툴 제공**
+- **프레임워크**란 특정한, 아주 작은 단위의 문제를 해결하는 것이 아니라 큰 단위의 솔루션을 제공 (정해져 있는 골격 제공)
+
+---
+
+## Next.js의 특징
+
+![image](https://github.com/subtitle1/devlog/assets/87356533/15b75fb4-457c-46f1-9fd6-97a4bdcf4ffb)
+
+복잡한 설정 없이 자바스크립트만으로 풀스택 설계가 가능하다. 코드 자동 스플리팅 및 페이지 기반 파일 기반 라우팅을 지원해 주고, 상황에 따라 다른 방식의 data fetching(한 번, 주기적, 서버 측, 클라이언트 측)을 제공해 준다. 그 외 미들웨어나 손쉬운 배포를 할 수 있는 등 여러 장점이 있으니, 더 자세한 사항은 [공식 문서](https://nextjs.org/)를 참고하도록 하자.
+
+> **splitting?**
+>
+> 사용자가 보고 있는 페이지만 코드를 잘게 잘라서 필요한 부분만 보내는 것으로, 웹페이지를 로딩하는 속도가 현저히 빨라진다.
+
+---
+
+## Next.js의 구현 특징
+
+### 1. Hybrid
+
+페이지 별로 각기 다른 렌더링 방식을 선택하고, 한 페이지 내에서도 적절한 렌더링 방식을 선택할 수 있다. 즉, 웹 어플리케이션의 성능을 높이기 위해 하나의 페이지 내에 `두 개 이상의 렌더링 방식`을 결합시키는 것이다.
+
+### 2. Hydration
+
+공식 페이지에서 정의한 하이드레이션의 개념은 다음과 같다.
+
+> When a page is loaded by the browser, its JavaScript code runs and makes the page fully interactive
+
+Next.js는 server side 단에서 미리 웹 페이지를 [Pre-Rendering](https://nextjs.org/docs/pages/building-your-application/rendering) 한다. 그리고 그렇게 생성된 HTML document를 클라이언트에게 먼저 보내고 나서, 바로 리액트가 번들링 된 JS 코드들을 클라이언트에게 전송한다. 그리고 이 자바스크립트 코드들이 프리 렌더링 된 HTML DOM 요소 위에 한 번 더 렌더링을 하면서, 각자 자기 자리를 찾아가며 다시 페이지를 그리게 된다.
+
+즉 하이드레이트는 서버단에서 렌더링 된 정적 페이지와 자바스크립트 파일을 클라이언트에게 보낸 후, 클라이언트 단에서 `HTML 코드와 JS 코드를 매칭시키는 과정`이다.

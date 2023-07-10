@@ -1,0 +1,140 @@
+---
+title: 관점 지향 프로그래밍, AOP에 대하여
+date: '2022-01-11'
+tags: ['Java', 'Spring', 'AOP']
+draft: false
+summary: 'Aspect Oriented Programming'
+---
+
+## 1. AOP(Aspect Oriented Programming)
+관점 지향이란 **코드를 핵심 기능과 공통 기능으로 구분해서 바라보는 시각**을 의미한다. 코드 안에는 여러 기능들이 있고, 공통으로 사용하는 기능, 핵심으로 사용하는 기술 등 여러 메소드들로 섞여있을 것이다. 개발을 진행하다 보면 공통 코드 때문에 동일한 코드의 중복이 많아진다. 어디서부터 어디까지가 공통 코드이고, 핵심 코드인지 구분이 힘들다. 핵심 기능을 변경하려고 하면 소스 코드의 많은 부분을 파악해야 하고, 기존의 공통 기능을 제거하거나 변경하거나 추가하는 작업이 모든 소스 코드에 대해서 진행되어야 하기 때문에 많은 부담이 있다. 이 부분을 극복하기 위한 것이 **관점 지향 프로그래밍**이다.
+
+메소드 안에 핵심 기능만 구현하고, 필요한 공통 기능은 핵심 기능이 실행될 때 함께 실행되게 하는 방식이다. 핵심 기능에 필요한 공통 기능을 메소드 안에 직접 작성하는 것이 아니라, 실행할 공통기능을 모듈로 분리해 내고, 핵심 기능이 실행될 때 같이 실행되게 한다.
+
+- **기존 코드의 문제점**
+    - 핵심 기능 코드와 공통 기능 코드가 메소드 안에 섞여 있다.
+    - 핵심 기능 코드를 변경/파악하기 어렵다.
+    - 새로운 공통기능을 추가하기 어렵다.
+    - 기존 공통기능을 변경하기 어렵다.
+
+## 2. AOP의 주요 구성 요소
+- Target
+	- 핵심 기능을 포함하는 메소드가 있는 객체
+	- 공통 기능 적용 대상이다
+- **Advice**
+	- 핵심 기능 실행시 같이 실행될 공통기능이 구현된 객체
+	- When(언제) + What(무엇을) 정보를 포함하고 있다
+		- 핵심 로직 실행전(when) 로그를 출력하는 (what) 공통 기능
+		- 핵심 로직 실행중 예외가 발생했을 때(when) 다른 예외로 변경해서 던지는(what) 공통기능
+		- 핵심 로직 실행 전후(when)에 실행시점을 계산해서 총 실행시간을 출력하는(what) 공통기능
+- JoinPoint
+	- 공통기능이 적용될 지점
+	- 스프링은 메소드 실행시점 JoinPoint만 지원한다
+	- Target의 메소드가 조인포인트다
+- **PointCut**
+	- 공통 기능을 적용하는 규칙
+	- Where 정보를 포함하고 있다
+- Aspect
+	- AOP 적용을 위한 패키지 (공통기능과 공통기능이 적용될 지점(적용규칙))
+	- 언제, 무엇을, 어디에
+	- 이런이런 공통 기능을 나는 여기에 정의할 거야! -> 이게 aspect
+		- Advice(When + What) + PointCut()
+- Weaving
+	- Target과 Aspect를 적용시켜서 Target에 대한 Proxy(대행자) 객체를 생성하는 것
+- Proxy
+	- 핵심 기능과 공통기능이 같이 포함되어 있는 객체
+
+## 3. Aspect
+- 공통기능 적용 패키지다
+- 공통기능 적용 패키지에는 What(공통기능) + When(언제) + Where(대상) 정보가 정의되어 있다.
+- **What**
+    - logging() 메소드의 수행문
+- **when**
+    - @Before : 핵심기능이 구현된 메소드가 실행되기 전에
+- **where**
+    - "within(com.sample.service.*Service)" : com.sample.service 패키지의 모든 서비스 클래스의 모든 메소드
+
+### **주요 어노테이션**
+
+- @Aspect
+    - AutoProxyCreator가 스프링 컨테이너에 등록된 빈 중에서 @Aspect 어노테이션이 부착된 빈을 스캔해서 대상 객체를 검색하고, 대상객체의 조인포인트와 결합시킨 프록시객체를 만들어서 스프링 컨테이너의 빈으로 등록한다.
+- @Before
+    - 공통기능이 대상 메소드 실행전에 실행된다.
+- @After
+    - 대상 메소드가 실행이 종료된 후에 실행된다.
+- @AfterReturning
+    - 공통기능이 대상 메소드가 오류없이 종료된 후에 실행된다.
+- @AfterThrowing
+    - 공통 기능이 대상 메소드 실행 중 예외가 발생되면 실행된다.
+- **@Around**
+    - 공통기능이 대상 메소드 실행 전후에 실행된다.
+    - 선언적 트랜잭션 처리를 지원하는 TransactionManager의 구현객체들이 @Around advice와 유사하다.
+- @PointCut
+    - 공통기능이 적용될 규칙을 지정할 때 사용한다.
+
+## 4. RunningTimeCheckAdvice
+대상 메소드 실행 전후에 실행할 공통기능을 구현하는 Advice 메소드로, 반환타입은 반드시 Object로 정한다. 메소드 이름은 상관없다. 매개변수에는 반드시 ProceedingJoinPoint 타입의 매개변수를 포함해야 한다. 예외는 Throwable를 던진다.
+
+- **JoinPoint와 ProceedingJoinPoint**
+    - 공통기능이 적용되는 지점에 대한 정보를 제공하는 객체다.
+    - 대상객체(BookService, CartItemService), 대상메소드, 대상메소드의 매개변수 등의 정보를 조회할 수 있다.
+    - JoinPoint는 실행시점이 @Before, @After, @AfterReturning, @AfterThrowing인 Advice에서 사용한다.
+    - ProceedingJoinPoint는 실행시점이 @Around인 Advice에서만 사용한다.
+    - ProceedingJoinPoint는 @Around Advice가 적용되는 대상 메소드를 실행시키는 기능이 포함되어 있다.
+
+- **코드 확인**
+    - execution(* com.sample.service.*Service.*(..))
+        - AspectJ 표현식으로, 공통 기능이 적용될 곳을 지정한다.
+    
+```java
+    @Aspect
+    public class RunningTimeCheckAdvice {
+
+        @Around("execution(* com.sample.service.*Service.*(..))")
+        public Object runningTimeCheck(ProceedingJoinPoint joinPoint) throws Throwable {
+            Object returnValue = null;
+            StopWatch stopWatch = new StopWatch();
+            
+            try {
+                // 실행시간 체크 시작
+                stopWatch.start();
+
+                // @Around Advice가 적용되는 대상메소드 실행 전에 실행할 코드 작성, @Before 시점과 동일하다
+
+                // @Around Advice가 적용되는 대상메소드를 실행시키는 코드, 대상메소드의 반환타입이 있으면 반환타입이 들어있고 반환타입이 없으면 null값이 들어가 있음
+                returnValue = joinPoint.proceed();
+                
+                // @Around Advice가 적용되는 대상메소드가 정상적으로 종료된 후 실행할 코드 작성, @AfterReturning 시점과 동일하다
+                
+                return returnValue;
+
+            } catch (Throwable e) {
+
+                // @Around Advice가 적용되는 대상메소드 실행 중 오류가 발생했을 때 실행할 코드 작성, @AfterThrowing 시점과 동일하다
+                throw e;
+
+            } finally {
+                // @@Around Advice가 적용되는 대상메소드 실행 후에 실행할 코드 작성, @After 시점과 동일하다, 오류가 실행되든 오류없이 실행되든 무조건 실행됨
+                
+                // 실행시간 체크 종료
+                stopWatch.stop();
+                
+                System.out.println("총소요시간: " + stopWatch.getTotalTimeMillis() + "밀리초 소요됨");
+            }
+        }
+    }
+```
+
+```xml
+    <!-- 
+        Spring AOP(관점지향 프로그래밍) 설정
+    -->
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+    <bean class="com.sample.aop.LoggingAdvice"></bean>
+    <bean class="com.sample.aop.RunningTimeCheckAdvice"></bean>
+```
+
+- **AOP의 특징**
+    - 핵심기능을 해치지 않고 공통기능을 별도의 모듈로 빼서 사용한다.
+    - 대상메소드에 대한 정보, 매개변수에 대한 정보를 알 수 있다.
+    - 단순한 로그의 출력, 예외가 발생했을 때 그 예외를 사용자정의 예외로 변환하는 것, 부하테스트, 트랜잭션 처리 등을 aop로 구현한다.

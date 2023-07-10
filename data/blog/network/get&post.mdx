@@ -1,0 +1,108 @@
+---
+title: Http Method, Get과 Post의 차이점
+date: '2022-03-20'
+tags: ['Network']
+draft: false
+summary: 'Http Method'
+---
+
+## GET과 POST
+Http 프로토콜을 이용해 서버에 **데이터를 전달할 때 사용하는 방식**이다.
+
+## GET과 POST의 차이
+- GET
+    - get 방식은 url에 정보를 포함한다. `(?name=hong&age=20)`
+    - url이 노출되고 캐시가 남아있어 보안적인 측면은 좋지 않으나, 전송속도가 우수하다.
+- POST
+    - post 방식은 주로 create, update, delete 방식에 사용된다.
+    - 캐시가 남지 않아 보안적인 측면에서 우수하다.
+    - 요청메세지의 Request Body에 데이터가 들어가기 때문에 파라미터 정보가 노출되지 않는 점이 GET 메소드와의 큰 차이점이다.
+
+## GET과 POST의 요청메세지
+- GET
+    - get 방식은 url에 파라미터 정보가 그대로 전달(노출)된다. 
+![image](https://user-images.githubusercontent.com/87356533/159145766-9fd1ee0f-c7b6-461e-91e9-b7ba12e53814.png)
+
+
+- POST
+    - post 방식 시 url에 데이터 정보를 포함하지 않는 것을 확인할 수 있다.
+    - 데이터로 전송되는 값들은 payload에서 확인할 수 있다.
+![image](https://user-images.githubusercontent.com/87356533/159145593-480e3743-c6b4-4905-9860-f76773e091e0.png)
+
+```js
+// CommonJavascript에 전역 변수로 선언
+let params = {};
+let url = "";
+
+selectList : function(params, url) {
+
+}
+
+selectList : function(params, url) {
+    // 1. 파라미터 재정의 해 주기
+    params = {
+        "armySe" 			: $("#searchArmySe :selected").val(), 		// 군구분
+        "author" 			: $("#searchAuthor :selected").val(), 		// 군구분
+        "txtSrch" 			: $("#txtSrch").val(), 					// 검색어
+    };
+    
+    // 2. url 재정의 해 주기
+    url = "/api/cmm/admin/getAdminList";
+
+    // Ajax Call
+    // 3. 다른 js에서도 중복되는 부분이라 commonJavascript로 옮겨도 될 것 같음
+    $.callAjaxSingle(url, params, function(retData,
+            retErrFlag, retErrorMsg) {
+        if (!retErrFlag) {
+            table.setData(retData);
+        } else {
+            MsgBox(retErrorMsg, "E");
+        }
+    });
+}
+```
+
+```js
+// cmmJs에 들어갈 내용
+// 변경될 수 있는 부분 : dolumns, dataLoaded(function), rowClick(function)
+// 가장 대표적으로 사용되는 function1, 2를 cmmJs에 넣고 그 외의 상황에서는 function1, 2를 재정의해서 사용
+var columns = [{title: "", field: "", visible: false}, ...];
+
+// 재정의 가능
+function1: function(data) {
+    var dataLength = formatNumber(data.length);
+        if (document.querySelector('[class="rowDiv"]') == null) {
+            var totalRowDiv = document.createElement('div');
+            totalRowDiv.className = 'rowDiv';
+            totalRowDiv.innerHTML =
+                "<div class='rowDiv' >총 " + dataLength + " 건 </div>";
+                        
+            document.querySelector('[class="tabulator-footer"]').appendChild(totalRowDiv);
+        } else {
+            var rowDiv = document.querySelector('[class="rowDiv"]')
+            rowDiv.innerText ='총 '+ dataLength + ' 건';
+        }
+}
+
+// 재정의 가능
+function2: function(e, row) {
+    clickRowData = row._row.data;
+    cmmAdminList.selectDataLoad(clickRowData);
+    $('#cmmAdminDetailModal').modal('show');
+}
+
+initTabulatorLoad : function(columns) {
+    table = new Tabulator("#listTabulator", {
+        index : "rowIdx",
+        placeholder : "No Data Available",
+        height : "420px",
+        layout : "fitColumns", // fit columns to width of table
+        pagination : "local", // paginate the data
+        paginationSize : COM_TABULATOR.PAGE, // allow rows per page of
+        columns : columns,
+        dataLoaded: function1(data),
+        // @param : e(이벤트), row(데이터)
+        rowClick : function2(e, row)
+    });
+}
+```

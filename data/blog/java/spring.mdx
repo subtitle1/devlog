@@ -1,0 +1,118 @@
+---
+title: Spring framework
+date: '2021-12-23'
+tags: ['Java', 'Spring']
+draft: false
+summary: 'Inversion of Control의 구현체'
+---
+
+# 스프링 프레임워크
+- **POJO기반의 JAVA EE 애플리케이션 개발을 지원하는 경량(light-weight)의 프레임워크**다.
+    - 여러 개의 라이브러리로 구성되어져 있다.
+    - 꼭 필요한 라이브러리만 구성할 수 있다.
+    - 즉, 시스템의 부하가 적다.
+    - POJO란?
+        - POJO (Plain Old Java Object)
+        - 평범한 옛날 자바 객체
+		- Plain : 특별한 라이브러리, 특별한 실행환경이 필요하지 않는 객체, 특정환경에 종속되지 않는 객체
+
+			  - 개발하기 쉽다.
+			  - 재사용성이 높다.
+			  - 테스트가 용이하다.
+		- Old : EJB 등장이전의 평범한 자바객체로 개발하던 시절
+
+			  - new 키워드로 객체를 생성하고 사용하던 시절
+			  - 특별한 실행환경이 필요없던 시절
+		- 특별한 환경 혹은 라이브러리에 종속되지 않는 재사용성이 높고, 테스트하기 쉬운 객체
+
+- 즉, 평범한 자바 클래스를 특별한 라이브러리로 개발하는 것이 spring이다.
+
+- **IOC의 구현체**이다.
+    - IOC: Inversion of Control, 제어 역전
+    - IOC의 구현체란 Spring Container를 의미한다.
+    - 어떤 모듈이 사용할 모듈을 스스로 결정하는 것이 아니라, 다른 모듈에게 선택권을 넘겨준다는 것을 의미한다.
+    - 사용할 모듈을 직접 생성하는 것이 아니라, 제 3자로부터 제공받는 것이다.
+    - 방법
+        - **DI(Dependency Injection: 의존성 주입)**
+            - 모듈간의 의존성을 외부(컨테이너)에서 주입시켜 주는 것.
+            - Spring Container에게 필요한 것을 명시하면 주입하는 것이다.
+        - **DL(Dependency Lookup: 의존성 검색, dependency pull)**
+            - 컨테이너가 관리 중인 객체 저장소에서 객체를 검색해서 참조하는 것.
+
+---
+
+## **Dependency Injection의 예시**
+
+- 원래 사용하던 방식으로는 클래스 A와 B가 있다면 객체를 생성하는 책임이 B에게 있었다.
+
+```java
+    public class A { ... }
+    public class B { A a = new A(); }
+```
+---
+
+- Spring에서는 어노테이션`(@Autowired)`만 붙여주면 된다.
+- 위의 예시와 다르게 객체를 획득하는 방식이 생성 -> **주입**으로 바뀐다.
+- **의존성주입이 없었다면:**
+    - 객체를 획득하는 코드를 직접 다 적어야 한다.
+    - 만약 객체를 변경해야 하는 일이 생긴다면 일일이 수정해야 한다.
+    - Controller와 Service라는 두 개의 클래스가 있다고 가정하자.
+
+```java
+    public class Controller { 
+        // Controller가 Service 객체가 필요해! 해서 변수로 선언하고, 어노테이션을 붙여 제 3자인 스프링컨테이너에게 주입받은 것임
+        @Autowired
+        private Service service;
+    }
+```
+
+--- 
+
+# Spring Container
+- 스프링 프레임워크에서 가장 중요한 기능을 담당한다.
+    - 다양한 인터페이스와 다양한 구현 클래스로 구성되어져 있다.
+- 객체의 생성, 유지/관리/실행, 객체의 폐기를 담당한다.
+- 스프링 설정파일을 기반으로 객체의 조립(di)을 지원한다.
+- spring bean configuration file 정보를 분석해 객체를 생성/조립/보관하는 객체다.
+
+## 스프링 빈 파일 설정하기
+
+- 스프링 빈 설정파일은 스프링 컨테이너에게 bean(객체) 생성 및 조립 정보를 전달하기 위해 정의한다.
+- spring bean configuration file
+    - 애플리케이션 실행에 필요한 객체에 대한 정보를 설정하는 파일이다.
+	- **bean** 태그를 이용해서 생성할 객체를 지정한다.
+	- **bean id="식별자" class="클래스의 전체경로"**
+	- 스프링 컨테이너는 class 속성으로 지정된 클래스를 로딩해서 객체를 생성한다.
+	- 스프링 컨테이너는 id 속성으로 지정된 값으로 생성한 객체를 고유하게 식별하고 관리한다.
+	- id 속성을 생략하면 클래스이름의 첫글자만 소문자로 변경한 이름이 id가 된다.
+    
+```jsp
+// xxx.xml 파일 형식
+<bean id="userController" class="com.sample.controller.UserController">
+    <!--
+        <property/> 태그를 이용해서 객체가 사용할 다른 객체를 조립시킬 수 있다.
+            + name 속성은 다른 객체가 조립될 멤버변수의 이름이다.
+            + ref는 name에서 지정한 멤버변수에 조립시킬 다른 객체의 bean 아이디다.
+            + 아래의 설정은 UserController 객체의 userService 멤버변수에 빈 아이디가 userServiceImpl인 객체를 조립시킨다.
+    -->
+    <property name="userService" ref="userServiceImpl"></property>
+</bean>
+```
+---
+
+## 스프링 컨테이너 객체 생성하기
+
+- ApplicationContext
+    + interface이다.
+    + 스프링 컨테이너 객체가 반드시 구현해야 할 기능을 정의하고 있다. 
+- ClassPathXmlApplicationContext
+    + 클래스다.
+    + ApplicationContext 인터페이스를 구현한 클래스이다.
+    + 지정된 리소스(스프링 빈 설정 파일)을 읽어서 객체 생성/조립/보관을 수행한다.
+    + 스프링 컨테이너는 특별한 설정이 없는 한 모든 객체를 싱글턴 상태로 유지한다.
+
+```java
+    // 스프링 빈 파일의 경로
+    String resource = "classpath:/spring/context-1.xml";
+    ApplicationContext ctx = new ClassPathXmlApplicationContext(resource);
+```

@@ -1,0 +1,107 @@
+---
+title: Chart.js의 방사형 차트, radar chart 사용하기
+date: '2022-01-31'
+tags: ['Java', 'SpringBoot', 'chartjs']
+draft: false
+summary: ''
+---
+
+![image](https://user-images.githubusercontent.com/87356533/151938890-5c7774aa-9662-4e6f-97a3-567db126fa6e.png)
+
+chart.js 라이브러리를 사용해서 차트 정보가 있을 때는 왼쪽처럼, 없을 때는 오른쪽처럼 정보를 출력해 보았다. 차트 api는 [링크](https://www.chartjs.org/)에서 확인 가능하다. 방사형 차트 말고도 바, 라인 등등 여러 차트가 존재하니 원하는 차트로 사용하면 된다. 처음에는 어려울 것 같았는데 공식 문서를 찬찬히 살펴보고, 구글링도 하면서 알아보니 의외로 간단해서 금방 구현할 수 있었다. 
+
+
+[해당 링크](https://www.chartjs.org/docs/latest/charts/radar.html)에서 주요 속성들과 configuration들을 확인 가능하고, 데모로 구현된 차트에서 여러 설정들을 바꿔가며 미리 어떤 기능이 어떻게 작동되는지 확인해 볼 수 있다. 
+
+
+api를 사용하기 위해서 cdn이 필요하다! script 코드는 제일 하단에 존재한다. html 코드부터 살펴보자. 
+
+## html
+
+```html
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    // 편의를 위해 차트 부분 html만 존재함
+    <div id="all-movie-graph" class="row border p-4 mt-5 mb-5">
+        <div class="col border-end" style="text-align: center;">
+            <dl>
+                <dt>관람포인트</dt>
+                <dd id="rank">-</dd>
+            </dl>
+            <div class="d-flex justify-content-center">
+                <!-- 관람포인트 차트 -->
+                <div id="point-graph">
+                    <canvas id="pointGraph" width="260" height="260"></canvas>
+                </div>
+                <!-- 데이터 없을 때 -->
+                <div class="no-graph1">
+                    <img alt="" src="/resources/images/movie/no-graph01.jpg">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+```
+
+## chart.js 설정
+
+- **기본 설정(data, labels)**
+
+원래 기존 차트에는 어떤 차트인지에 대한 정보가 범례로 표현되는데, 그 부분을 제거하기 위해서는 맨 윗줄처럼 **Chart.defaults.global.legend.display = false;**을 작성해 주면 된다. html 코드에서 **\<canvas id="pointGraph">**와 같이 아이디를 부여하였고, 그 아이디를 선택하여 차트를 생성한다. type에는 원하는 차트를 입력(필자는 radar)하고, data는 차트에 표현할 데이터 라벨을 정의해 주면 된다.
+
+- **datasetst 설정**
+
+datasets에는 각각의 데이터 라벨에 들어갈 수치들을 입력해 주면 되는데, 나는 ajax로 데이터를 받아와서 데이터를 뿌리고 제일 높은 두 개의 데이터를 선정해서 맨 위 사진과 같이 정보를 표현해 주었다. 이 부분은 다음 포스팅에서 다뤄야지! 또 datasets 안의 fill과 그 아래 속성들은 디자인 관련 속성들이니 스킵하도록 하겠다.
+
+- **option 설정**
+
+옵션 설정에 대한 부분은 [링크](https://stackoverflow.com/questions/39249722/set-min-max-and-number-of-steps-in-radar-chart-js)를 참고하여 작성하였다. max 데이터값과 min 데이터값을 정의해 주는 부분이다. 나는 차트에 뿌릴 데이터가 10, 20과 같이 넘어오기 때문에 10부터 100까지로 설정하였다. 또, `callback: function() {return ""}` 부분도 구글링을 하다가 찾은 부분인데, 링크를 찾지 못하겠다. 해당 기능이 존재하지 않으면 아래 사진처럼 **y축에 대한 값**이 뜨는데 이를 제거해 주는 기능이다.
+
+![image](https://user-images.githubusercontent.com/87356533/151944438-30cce87f-27c5-4e18-abaf-b12f2678490a.png)
+
+## script
+
+```javascript
+<script>
+    Chart.defaults.global.legend.display = false; // 차트 범례 제거
+
+    let pointChart = new Chart(document.getElementById("pointGraph"), {
+        // 차트의 형태
+        type: 'radar', 
+
+        // 차트에 들어갈 데이터
+        data: { 
+            labels: [
+                'ost',
+                '연출',
+                '스토리',
+                '영상미',
+                '배우'
+            ],
+            datasets: [{
+                data: [20, 30, 40, 60, 50], // 임의로 작성한 데이터
+                fill: true,
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(153, 102, 255, 1)'
+            }],
+        },
+        options: {
+            scale: {
+                ticks: {
+                    beginAtZero: true,
+                    max: 100,
+                    min: 10,
+                    stepSize: 20,
+                    callback: function() {return ""},
+                }
+            }
+        }
+    });
+</script>
+```

@@ -1,0 +1,136 @@
+---
+title: 리뷰 최신순 / 평점순 정렬
+date: '2022-02-03'
+tags: ['Java', 'SpringBoot']
+draft: false
+summary: ''
+---
+
+![image](https://user-images.githubusercontent.com/87356533/152642442-f7932328-196a-4660-bebf-eb1d24c855d3.png)
+
+리뷰를 최신순/평점순으로 정렬해 보았다. 구현에 사용된 클래스들과 html을 하나씩 살펴보도록 하자. 화면은 부트스트랩과 css를 사용하여 구성하였다. 
+
+### ReviewMapper
+
+파라미터 값으로 넘겨주는 Criteria의 멤버변수로는 page, movieNo, option, beginIndex, endIndex가 있다. 페이지네이션 시 필요한 값과 넘겨받는 영화번호에 해당하는 리뷰만 출력하도록 sql 구문을 작성하였다. option에는 date(최신순), rate(평점순) 값을 jsp 쪽에서 넘겨주도록 할 것이다.
+
+```xml
+    <select id="getAllReviewsByMovieNo" parameterType="com.example.web.form.Criteria" resultType="com.example.dto.ReviewDto">
+            select 
+                review_no reviewNo,
+                customer_id customerId,
+                review_score reviewScore,
+                review_content reviewContent
+            from 
+                (select 
+                    row_number() over (order by 
+                    <choose>
+                        <when test="option == 'date'">r.review_no desc</when>
+                        <when test="option == 'rate'">r.review_score desc</when>
+                    </choose>
+                    ) rn,
+                    r.review_no, c.customer_id, r.review_score, r.review_content
+                    from customer c, review r, movie m
+                where 
+                        r.movie_no = m.movie_no
+                        and c.customer_no = r.customer_no
+                    and m.movie_no = #{movieNo})
+            where 
+                rn between #{beginIndex} and #{endIndex}
+    </select>
+```
+
+### Controller
+
+컨트롤러에서 페이지네이션 시에 필요한 객체를 생성하였다. 페이지네이션 객체는 [링크](https://subtitle1.github.io/java/pagination/)에서 확인할 수 있다. 컨트롤러는 restController로 설정하였고, 데이터의 정형화와 json 텍스트로 전달하기 위해서 ResponseDto로 반환하였다. restController는 요청핸들러 메소드가 반환하는 값을 응답메세지의 body에 포함시킨다. 나는 프로젝트에 jackson-databind 라이브러리가 포함되어 있기 때문에 요청핸들러 메소드가 반환하는 값이 json 형식의 텍스트로 변환된 다음 전달된다.
+
+ajax로 전달받은 response를 콘솔창에 찍어 보니 다음과 같이 items 안에 option, pagination, reviews, totalReviews가 name / value의 형태로 전달된 것을 확인할 수 있다.
+
+![image](https://user-images.githubusercontent.com/87356533/152643997-99ae9bf3-a251-4be1-9627-ebe282913636.png)
+
+```java
+    @RestController
+    @RequestMapping("/rest")    
+    public class ReviewRestController {
+
+        @GetMapping("/review")
+        public ResponseDto<Map<String, Object>> reviews(Criteria criteria) {
+            if (criteria.getPage() < 1) {
+                criteria.setPage(1);
+            }
+            
+            // 영화번호에 해당하는 리뷰의 총 개수
+            int totalRecords = reviewService.getTotalRecords(criteria.getMovieNo());
+            Pagination pagination = new Pagination(criteria.getPage(), totalRecords);
+            
+            // 페이지네이션에서 구한 시작페이지와 끝페이지를 세팅한다
+            criteria.setBeginIndex(pagination.getBegin());
+            criteria.setEndIndex(pagination.getEnd());
+            String option = criteria.getOption();
+            
+            ResponseDto<Map<String, Object>> response = new ResponseDto<>();
+            List<ReviewDto> reviews = reviewService.getAllReviewsByMovie(criteria);
+            int totalReviews = reviewService.getAllReviewsByMovie(criteria).size();
+            
+            // json 형태로 전달하기 위해 responseDto를 정의하여 map 객체로 화면 구현에 필요한 객체들을 반환한다
+            response.setStatus(true);
+            response.setItems(Map.of("pagination", pagination, "reviews", reviews, "totalReviews", totalReviews, "option", option));
+            
+            return response;
+        }
+    }
+```
+
+### jsp
+
+input 태그에 name을 option으로, value를 각각 date, rate로 설정해 주었다. script 태그에서는 name이 option인 input 태그를 클릭했을 때 클릭한 값을 order 변수에 전달해 준다. 
+
+```html
+    // 간략화한 html
+    <div class="row">
+        <div class="movie-sorting text-end">
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                // input에 name과 value를 설정해 준다.
+                <input type="radio" class="btn-check" name="option" value="date" id="date" autocomplete="off" checked>
+                <label class="btn btn-outline-dark btn-sm" for="date">최신순</label>
+                <input type="radio" class="btn-check" name="option" value="rate" id="rate" autocomplete="off">
+                <label class="btn btn-outline-dark btn-sm" for="rate">평점순</label>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    let currentPageNo = 1;
+    getReviews();
+
+    // 최신순, 평점순 정렬
+    $(":input[name=option]").click(function() {
+        // 최신순이나 평점순 버튼을 클릭했을 때 페이지의 번호를 다시 1로 초기화시켜 준다.
+        currentPageNo = 1;
+
+        // review 목록이 들어가는 곳의 div를 empty로 지워준다.
+        $(".review-box").empty();
+
+        // getReviews() 함수로 옵션에 해당하는 리뷰 목록을 다시 div에 붙인다.
+        getReviews();
+    })
+
+    function getReviews() {
+        // 선택한 input 태그의 값을 order 변수에 저장한다.
+        let order = $("[name=option]:checked").val();
+
+        // 리뷰 출력 시 필요한 값들을 전달한다.
+        $.getJSON('/rest/review', {page: currentPageNo, option: order, movieNo: movieId}, function(response) {
+            let reviews = response.items.reviews;
+            
+            // 리뷰가 없을 때
+            if (reviews == "") {
+                $(".no-review").text("에는 아직 등록된 리뷰가 존재하지 않습니다.");
+            // 리뷰가 있을 때
+            } else {
+                // 리뷰 목록을 출력하는 코드는 너무 길어서 생략
+            }
+        }
+    }
+    </script>
+```

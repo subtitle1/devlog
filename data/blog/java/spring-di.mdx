@@ -1,0 +1,177 @@
+---
+title: 스프링의 의존성 주입
+date: '2021-12-27'
+tags: ['Java', 'Spring']
+draft: false
+summary: 'Dependency Injection'
+---
+
+## 의존성 주입의 두 가지 방식
+의존성 주입 방법에는 두 가지가 있다. **`setter`** 메소드를 이용해서 의존성을 주입하는 방식과, **`constructor`** 생성자 메소드를 이용해서 의존성을 주입하는 방식이다. 두 방식에서 공통적으로 들어가야 하는 부분은 **의존성 주입을 통해 전달받은 객체를 저장하는 변수**인데, 이 멤버변수의 타입은 의존성 주입을 받는 객체의 부모타입도 가능하다. `(ex. interface 클래스)` 아래 예제에서 사용되는 클래스들은 모두 예제용이니 어떤 방식으로 이용되는지 참고만 하도록 하자.
+
+## **setter 주입**
+
+```java
+    public class SampleController {
+        UserService userService;
+    }
+
+    // 의존하는 객체를 전달하는 setter 메소드이다
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+```
+
+- 아래 코드는 빈 설정파일(bean configuration file)이다.
+
+```xml
+    <bean id="userServiceImpl" class="com.sample.service.UserServiceImpl"></bean>
+
+    <!--
+        첫번째 방법. property 태그 사용
+        name: setter 메소드 이름
+        ref : setter 메소드의 매개변수로 전달되는 객체의 빈 아이디
+    -->
+    <bean id="setterController" class="com.sample.controller.SampleSetterController">
+        <property name="userService" ref="userServiceImpl"></property>
+    </bean>
+
+    <!--
+        두번째 방법. p 속성 사용
+        p:setter메소드이름-ref="스프링 컨테이너에 보관 중인 객체의 아이디"
+    -->
+    <bean id="controller" class="com.sample.controller.SampleController"
+        p:userService-ref="userServiceImpl">
+    </bean>
+```
+
+---
+## **constructor 주입**
+
+- 생성자 메소드를 이용해 의존성 주입을 받는 객체에는 반드시 **constructor-arg 태그의 개수와 동일한 매개변수를 가지는 생성자**가 정의되어 있어야 한다.
+
+```java
+    public class SampleController {
+        UserService userService;
+
+        // 의존하는 객체를 전달받을 생성자 메소드
+        public SampleController(UserService userService, ProductService productService) { 
+            this.userService = userService; 
+            this.productService = productService; 
+        }
+    }
+```
+
+```xml
+    <bean id="userServiceImpl" class="com.sample.service.UserServiceImpl"></bean>
+
+    <!--
+        첫번째 방법. constructor-arg 태그 사용
+        name : 생성자 메소드의 매개변수 이름
+        ref  : 스프링 컨테이너에 보관중인 객체의 아이디
+    -->
+    <bean id="controller" class="com.sample.controller.SampleController">
+        <constructor-arg name="userService" ref="userServiceImpl"></constructor-arg>
+    </bean>
+
+    <!--
+        두번째 방법. c 속성 사용
+        c:생성자 매개변수 이름-ref="스프링 컨테이너에 보관중인 객체의 아이디"
+    -->
+    <bean id="sampleController" class="com.sample.controller.SampleConstructorController"
+            c:userService-ref="userServiceImpl"></bean>
+```
+
+---
+
+## **의존성 주입 대상**
+
+- **객체 타입**
+    - 스프링 컨테이너가 **생성/보관/조립**하는 객체를 말한다.
+    - bean 태그나 지정된 패키지를 스캔해서 스프링 컨테이너에 등록된 객체다.
+    - 다른 객체에 조립될 때 ref 속성을 사용한다.
+
+```xml
+    <property name="setter메소드이름" ref="빈의 아이디"/>
+```
+
+- **Collection 타입**
+    - 기본자료형값이나 스프링 컨테이너가 생성/보관/조립하는 객체를 여러 개 저장하고 있는 객체를 말한다.
+    - **배열, Set, List** 등이다.
+    - setter / constructor 주입을 통해 의존성 주입이 가능하다.
+
+```java
+    public class SampleController {
+        String[] urls;
+        Set<MessageService> messageServices;
+        List<ExceptionHandler> exceptionHandlers;
+
+        public void setUrls(String[] urls urls) { this.urls = urls; }
+        public void setMessageServices(Set<MessageService> messageServices) { this.messageServices = messageServices; }
+        public void setExceptionHandlers(List<ExceptionHandler> exceptionHandlers) { this.exceptionHandlers = exceptionHandlers; }
+    }
+```
+
+```xml
+    <bean id="sampleController" class="com.sample.SampleController">
+        <property name="urls">
+            <array>	<!-- 아래의 값을 담을 배열객체를 생성시킨다. -->
+                <value>http://www.daum.net</value>
+                <value>http://www.naver.com</value>
+            </array>
+        </property>
+        <property name="messageServices">
+            <set> <!-- 아래의 객체를 담을 Set구현객체를 생성시킨다. -->
+                <ref bean="smsMessageService"/>
+                <ref bean="emailMessageService"/>
+            </set>
+        </property>
+        <property name="exceptionHandler">
+            <list> <!-- 아래의 객체를 담을 List구현객체를 생성시킨다. -->
+                <ref bean="runtimeExceptionHandler"/>
+                <ref bean="DataAccessExceptionHandler"/>
+            </list>
+        </property>		
+    </bean>
+```
+
+- **Map 타입**
+    - 기본자료형값이나 스프링 컨테이너가 생성/보관/조립하는 객체를 **key, value**의 쌍으로 여러 개 저장하는 객체다.
+    - 조건식의 상수값을 Map 객체의 key로 활용하면 조건식을 없앨 수 있다.
+
+```java
+public class SampleController {
+    Map<String, MessageService> messageServices;
+
+    public void setMessageSerivces(Map<String, MessageService> messageServices){ this.messageServices = mnessageSerivices; }
+
+    public void execute(String key, String message) {
+        MessageService service = messageServices.get(key);
+        service.send(message);
+    }
+}
+```
+
+```xml
+    <bean id="sampleController" class="com.sample.sampleController">
+        <property>
+            <map>
+                <entry key="sms" value-ref="smsMessageServiceImpl" />
+                <entry key="email" value-ref="emailMessageServiceImpl" />
+            </map>
+        </property>
+    </bean>
+```
+
+- **기본자료형 타입**
+    - int, double, boolean, String 등이다.
+    - 다른 객체에 조립될 때 value 속성을 사용한다.
+
+```xml
+    <property name="setter메소드이름" value="기본자료형값"></property>
+
+    <bean id="sampleController" class="com.sample.controller.SampleValueController">
+        <property name="host" value="192.168.10.2"></property>
+        <property name="port" value="3000"></property>
+    </bean>
+```

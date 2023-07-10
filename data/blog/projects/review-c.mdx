@@ -1,0 +1,141 @@
+---
+title: 관람평 등록 전 exception 처리하기
+date: '2022-02-04'
+tags: ['Java', 'SpringBoot']
+draft: false
+summary: ''
+---
+
+관람평 등록 시 실제 예매 여부, 작성 리뷰 여부를 체크해서 exception을 발생시키도록 처리하는 코드를 다시 복습해 보려고 한다. 로직 플로우는 아래와 같다.
+
+![Untitled Diagram drawio (1)](https://user-images.githubusercontent.com/87356533/155128769-6fa2182a-58ba-4872-b9b0-c69c04d33049.png)
+
+첫번째로, 해당 고객의 예매 여부를 확인하는 쿼리문 및 서비스 로직이다. erd는 아래와 같다. 리뷰를 작성하고자 하는 영화의 번호와 고객번호가 필요하기 때문에 티켓 테이블과 상영시간표 테이블을 조인하였다.
+
+![image](https://user-images.githubusercontent.com/87356533/155129791-37252a53-8c35-4efb-bfa3-6aa8b0b02ff6.png)
+
+## sql
+같은 영화를 여러 번 예매했을 수도 있기 때문에 list로 받아왔다. 
+
+```sql 
+<!-- List<String> getQualification(@Param("customerNo") int customerNo, @Param("movieNo") int movieNo); -->
+	<select id="getQualification" resultType="string">
+		select 
+   			t.ticket_cancelled ticketCancelled
+		from 
+		    show_schedule s, ticket t
+		where 
+		    s.show_schedule_no = t.show_schedule_no
+			and t.customer_no = #{customerNo}
+			and s.movie_no = #{movieNo}
+			and t.ticket_cancelled = 'N'
+	</select>
+```
+
+## Service
+서비스 로직은 isReserved, isWrited 두 가지로 구현하였다. isReserved는 반환하는 리스트가 비어있지 않으면 true를, isWrited는 작성된 관람평이 없다면 true를 반환하는 메소드이다.
+
+```java
+	/**
+	 * 사용자 번호로 해당 영화에 대한 예매 여부를 확인한다.
+	 * @param customerNo
+	 * @param movieNo
+	 * @return
+	 */
+	public boolean isReserved(int customerNo, int movieNo) {
+		List<String> isReserved = reviewMapper.getQualification(customerNo, movieNo);
+		return !isReserved.isEmpty();
+	}
+	
+	/**
+	 * 사용자 번호와 영화 번호로 해당 영화에 작성한 리뷰가 있는지 확인한다.
+	 * @param customerNo
+	 * @param movieNo
+	 * @return
+	 */
+	public boolean isWrited(int customerNo, int movieNo) {
+		Review review = reviewMapper.getMyReviewByMovieNo(customerNo, movieNo);
+		return review == null;
+	}
+```
+
+## Controller
+다음의 코드는 exception 핸들러이다. 컨트롤러 측에서 ReviewErrorException 예외를 발생시킬 때 바로 아래의 exception 핸들러 코드가 실행된다. 예매를 하지 않았거나, 이미 작성된 관람평이 있다면 exception을 발생시킨다. 
+
+예매를 하지 않고 관람평 쓰기 버튼을 클릭했을 때 받아오는 응답은 다음 사진과 같다. status는 false, error에는 exception 시 띄울 메세지, items는 null 값이 전달된다. 반대로 예매를 이미 했을 경우에는 items에 message: true가 반환이 되게끔 구현하였다. 
+
+![image](https://user-images.githubusercontent.com/87356533/155131570-c77c1866-1d6d-4361-b651-343d3ec1ebfc.png)
+
+```java
+@ExceptionHandler(ReviewErrorException.class)
+public @ResponseBody ResponseDto<?> ReviewExceptionHandler(ReviewErrorException e) {
+    ResponseDto<?> response = new ResponseDto<>();
+    
+    response.setStatus(false);
+    response.setError(e.getMessage());
+    
+    return response;
+}
+```
+
+다음은 **/rest/check** url 요청이 왔을 때 실행되는 컨트롤러 코드이다. 
+
+```java
+    @RestController
+    @RequestMapping("/rest")
+    public class ReviewRestController {
+        @GetMapping("/check")
+        public ResponseDto<Map<String, Object>> checkQualification(@LoginedUser Customer customer, int movieNo) {
+            
+            ResponseDto<Map<String, Object>> response = new ResponseDto<>();
+            HashMap<String, Object> items = new HashMap<>();
+            
+            boolean isReserved = reviewService.isReserved(customer.getNo(), movieNo);
+            boolean isWrited = reviewService.isWrited(customer.getNo(), movieNo);
+            
+            if (isReserved) {
+                items.put("message", true);
+            } else {
+                throw new ReviewErrorException("관람평은 실관람 이후 작성 가능합니다.");
+            }
+            
+            if (isWrited) {
+                items.put("message", true);
+            } else {
+                throw new ReviewErrorException("이미 작성한 관람평이 있습니다.");
+            }
+            
+            response.setStatus(true);
+            response.setItems(items);
+            
+            return response;
+        }
+    }
+```
+
+## JSP
+jsp에서는 아래와 같이 작업하였는데, 관람평 쓰기 버튼을 클릭했을 때 다음과 같은 ajax 요청이 오도록 구현을 했고 응답으로 받은 items가 존재한다면 관람평 모달을 띄우고, items이 존재하지 않다면 exception 시의 메세지를 오류 모달에 띄우도록 하였다.
+
+```html
+<script>
+    $(".review-btn").click(function() {
+        $.ajax({
+            type: "get",
+            url: "/rest/check",
+            data: {movieNo: movieId},
+            dataType: 'json',
+            async: false,
+            success: function (response) {
+                if (response.items) {
+                    reviewModal.show();
+                } else {
+                    showError(response.error);
+                    return; 
+                }
+            }
+        })
+    })
+</script>
+```
+
+사실 위의 코드도 여러 번 수정한 코드이고, 구현은 정상적으로 되었지만 조금 더 좋은 방식으로 코드를 작성할 수 없었나 싶은 고민을 하고 있다 🤔🤔

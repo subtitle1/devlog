@@ -1,0 +1,116 @@
+---
+title: ajax로 데이터 차트에 출력하기, 순위 정렬
+date: '2022-02-01'
+tags: ['Java', 'SpringBoot', 'chartjs']
+draft: false
+summary: ''
+---
+
+![image](https://user-images.githubusercontent.com/87356533/151955507-ed051da5-2d77-4f90-8d14-d91fa6a8fa1d.png)
+
+ajax로 차트 데이터를 가져와서 chart.js 차트를 출력해 보았다. html 코드는 **[링크](https://subtitle1.github.io/daily/fn4/)**에서 확인 가능하다. 나 같은 경우에는 **/rest/pointCounts**라는 url을 요청하면 아래 사진과 같은 응답이 오게 되는데, 이 데이터를 차트에 어떻게 대입시키는지 알아보고, 또 점수가 가장 높은 두 개의 데이터도 출력해 보도록 하자.
+
+![image](https://user-images.githubusercontent.com/87356533/151956201-af7b0b42-8f5a-4d38-90c9-645170bcfcb3.png)
+
+
+## **순서대로 차트에 뿌릴 통계 정의**
+
+map 함수를 사용해 기존에 있던 데이터에서 stat만 가져온다. stats을 콘솔에 찍어보면 [80, 40, 20, 20, 40]이란 결과가 출력된다. 이 결과를 차트 안의 datasets 프로퍼티 안에 있는 data에 stats[0], stats[1]과 같이 순서대로 적어주면 된다.
+
+```javascript
+    let stats = response.items.map(item => item.stat);
+    datasets: [{
+        data: [stats[0], stats[1], stats[2], stats[3], stats[4]]
+        }]
+```
+
+## **포인트 랭킹 정의**
+
+자바스크립트의 **sort 함수를 사용**해서 데이터를 정렬할 수 있다. 
+
+**sort() 함수는 배열의 요소를 정렬하기 위해 사용하는 메소드**이다. 
+a - b를 해서 양수가 나오면 a의 값이 큰 것이고, 음수가 나오면 b의 값이 큰 것이고, 0이 나온다면 a와 b의 값은 같은 것이다. 나는 내림차순 정렬을 하기 위해 a와 b의 순서를 바꿔주었다. 이후 filter 함수로 배열의 두번째 요소까지 얻어낸 후, 정보를 출력하고자 하는 곳에 **```$("#rank").text(rank[0].name+" · "+rank[1].name);```** 와 같이 정의해 준다.
+
+```javascript
+    let rank = response.items.map(function(stat) {
+        let results = {
+            no: stat.pointNo,
+            name: stat.pointName,
+            stat: stat.stat
+        };
+        return results;
+    })
+    .sort((a, b) => b.stat - a.stat)
+    .filter((item, index) => index < 2);
+
+    $("#rank").text(rank[0].name+" · "+rank[1].name);
+```
+
+## **전체 script**
+
+```javascript
+    $.ajax({
+        type: "get",
+        url: "/rest/pointCounts",
+        data: {movieNo : movieId},
+        dataType: 'json',
+        success: function(response) {
+            
+            $(".no-graph1").empty();
+            
+            // 순서대로 차트에 뿌릴 통계
+            let stats = response.items.map(item => item.stat);
+            
+            // 포인트 랭킹
+            let rank = response.items.map(function(stat) {
+                let results = {
+                    no: stat.pointNo,
+                    name: stat.pointName,
+                    stat: stat.stat
+                };
+                return results;
+            })
+            .sort((a, b) => b.stat - a.stat)
+            .filter((item, index) => index < 2);
+            
+            $("#rank").text(rank[0].name+" · "+rank[1].name);
+            
+            let pointChart = new Chart(document.getElementById("pointGraph"), {
+                type: 'radar', // 차트의 형태
+                data: { // 차트에 들어갈 데이터
+                    labels: [
+                        'ost',
+                        '연출',
+                        '스토리',
+                        '영상미',
+                        '배우'
+                    ],
+                    datasets: [{
+                        data: [stats[0], stats[1], stats[2], stats[3], stats[4]],
+                        fill: true,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(153, 102, 255, 1)'
+                    }],
+                },
+                options: {
+                    scale: {
+                        ticks: {
+                            beginAtZero: true,
+                            max: 100,
+                            min: 10,
+                            stepSize: 20,
+                            callback: function() {return ""},
+                        }
+                    }
+                }
+            });
+        },
+        error: function() {
+            $("#point-graph").empty();
+        }
+    })
+```

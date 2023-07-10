@@ -1,0 +1,236 @@
+---
+title: 좋아요 기능 구현하기
+date: '2022-01-28'
+tags: ['Java', 'SpringBoot', 'jquery', 'javascript']
+draft: false
+summary: ''
+---
+
+## 좋아요 기능 로직 플로우
+![image](https://user-images.githubusercontent.com/87356533/152679003-bd18964b-8ec3-4d6b-8cc2-8ae9eb40e314.png)
+
+
+영화 목록 및 영화 상세 페이지에서 하트 버튼을 클릭했을 때, 하트가 채워지며 숫자도 +1 증가되는 기능을 구현하였다. 생각보다 쉽고 빠르게 만들어서 공유하고자 쓰는 포스팅.
+
+![image](https://user-images.githubusercontent.com/87356533/151699211-1b03a439-b4e7-477b-bc63-b6c13ed09d7c.png)
+
+## 테이블 구조
+
+테이블은 **customer_no**와 **movie_no**로만 구성된다.
+
+## movieMapper
+
+```java
+@Mapper
+    public interface MyMovieMapper {
+
+        void saveLike(MyMovie myMovie);
+        void upLike(int movieNo);
+        void deleteLike(MyMovie myMovie);
+        void downLike(int movieNo);
+        int getLikeCount(int movieNo);
+        List<MyMovie> getMyMovies(int customerNo);
+    }
+```
+
+## **2. Mapper sql**
+
+sql문은 좋아요를 추가하는 sql문만 예시로 들었다. 좋아요를 삭제하는 sql문은 반대로 하면 된다. getMyMovies는 영화 목록 페이지에 들어갔을 때, 로그인한 사용자가 💜한 영화 목록만 채워진 하트로 띄워놓기 위해 작성한 sql이다. 또, 맨 마지막의 getLikeCount 구문은 영화 테이블에서 해당 영화번호의 좋아요 개수를 가져오기 위한 구문이다.
+
+```xml
+	<insert id="saveLike" parameterType="com.example.vo.MyMovie">
+		insert into my_movie
+		(customer_no, movie_no)
+		values
+		(#{customerNo}, #{movieNo})
+	</insert>
+	
+	<update id="upLike" parameterType="int">
+		update movie
+		set 
+			movie_total_liked = movie_total_liked + 1
+		where movie_no = #{value}
+	</update>
+
+    <select id="getMyMovies" parameterType="int" resultType="com.example.vo.MyMovie">
+		select movie_no movieNo
+		from my_movie
+		where customer_no = #{value}
+	</select>
+
+    <select id="getLikeCount" parameterType="int" resultType="int">
+		select movie_total_liked
+		from movie
+		where movie_no = #{value}
+	</select>
+```
+
+## **3. Service**
+
+```java
+    @Service
+    @Transactional
+    public class MyMovieService {
+
+        @Autowired
+        private MyMovieMapper myMovieMapper;
+        
+        // 좋아요 개수 업
+        public MyMovie upLike(int customerNo, int movieNo) {
+
+            MyMovie liker = new MyMovie();
+            liker.setCustomerNo(customerNo);
+            liker.setMovieNo(movieNo);
+            
+            myMovieMapper.saveLike(liker);
+            myMovieMapper.upLike(movieNo);
+            
+            return liker;
+        }
+
+        // 영화에 해당하는 좋아요 개수 반환
+        public int getLikeCount(int movieNo) {
+            return myMovieMapper.getLikeCount(movieNo);
+        }
+        
+        // 사용자가 좋아요 누른 영화 목록 반환
+        public List<MyMovie> getMyMovies(int customerNo) {
+            return myMovieMapper.getMyMovies(customerNo);
+        }
+    }
+```
+
+
+## **4. Controller**
+
+데이터의 응답을 정형화시키기 위해 ResponseDto를 사용해서 json 형태로 응답을 보낸다. 사용자가 처음 좋아요 버튼을 눌렀을 때는 PostMapping으로 테이블에 insert가 되고, 반대로 다시 버튼을 눌렀을 때는 DeleteMapping으로 테이블에서 삭제되는 구조이다.
+
+```java
+    @RestController
+    @RequestMapping("/rest")
+    public class MyMovieRestController {
+
+        @Autowired
+        private MyMovieService myMovieService;
+        
+        // 좋아요 추가
+        @PostMapping("/like")
+        public ResponseDto<Map<String, Object>> like(@LoginedUser Customer customer, int movieNo) {
+            
+            if (customer == null) {
+                throw new LoginErrorException("로그인이 필요한 서비스입니다.");
+            }
+            
+            ResponseDto<Map<String, Object>> response = new ResponseDto<>();
+            
+            MyMovie liker = myMovieService.upLike(customer.getNo(), movieNo);
+            int likeCount = myMovieService.getLikeCount(movieNo);
+            
+            response.setStatus(true);
+            response.setItems(Map.of("liker", liker, "likeCount", likeCount));
+            
+            return response;
+        }
+
+        // 좋아요 삭제 생략
+
+        // 좋아요 누른 영화 목록만 반환
+        @GetMapping("/myMovies") 
+        public ResponseDto<List<MyMovie>> myMovies(@LoginedUser Customer customer) {
+            
+            ResponseDto<List<MyMovie>> response = new ResponseDto<>();
+            List<MyMovie> movies = myMovieService.getMyMovies(customer.getNo());
+            
+            if (movies == null) {
+                response.setStatus(false);
+                return response;
+            }
+            
+            response.setStatus(true);
+            response.setItems(movies);
+            
+            return response;
+        }   
+    }
+```
+
+## **5. js**
+
+대망의 자바스크립트 + jquery + jsp를 사용한 코드...! 다른 건 금방 했는데 이 부분이 제일 까다로웠던 것 같다. 영화 목록을 보여 주기 전에 로그인한 사용자가 하트 누른 게시글을 조회해서 리스트에 띄운다.
+
+```javascript
+    <script>
+        $(function() {
+
+            showMyMovies();   
+
+            function showMyMovies() {
+                $.ajax({
+                    type: "get",
+                    url: "/rest/myMovies",
+                    success: function(response) {
+                        if (response.status) {
+                            let movieNo = (response.items.map(item => item.movieNo));
+
+                            $.each(movieNo, function(index, movie) {
+                                $("#btn-"+movie).find('img').attr('src', "/resources/images/movie/like.png");
+                            })
+                        }
+                    }
+                })
+            };
+        })
+    </script>
+```
+
+
+아래 코드는 좋아요 토글 버튼을 구현하기 위한 것이다. 영화 리스트도 ajax로 가져왔기 때문에 `$(".btn-like").function() {}`과 같이 사용할 수 없다. \<div class="poster">(ajax로 생성된 부분이 아닌, 기존 html 코드에 존재하는 부분) 하단에 위치한 \<button class="btn-like"> 버튼을 눌렀을 때 해당 기능이 작동되어야 하기 때문에 **jquery의 on.('click')** 기능을 사용하였다. 로그인하지 않은 사용자는 좋아요 기능을 사용할 수 없기 때문에, 세션에서 조회한 결과가 null이면 사진과 같이 에러 모달창이 띄워지도록 구현하였다. 
+
+![image](https://user-images.githubusercontent.com/87356533/151700840-40e5771f-7107-417a-89a6-24a08ca44dc1.png)
+
+```javascript
+    <script>
+        $(".poster").on('click', '.btn-like', function() {
+			
+			let movieNo = $(this).attr("data-no");
+			let button = $(this);
+			let unlike = "/resources/images/movie/unlike.png"; // 비워진 하트
+			let like = "/resources/images/movie/like.png"; // 채워진 하트
+			
+			if (button.find('img').attr('src') == unlike) {
+				
+				$.ajax({
+					type: "post",
+					url: "/rest/like",
+					data: {movieNo: movieNo},
+					datType: "json",
+					success: function(response) {
+						if (response.error) {
+							$("#span-error").text(response.error);
+							errorModal.show();
+							
+							$("#submit").click(function() {
+								errorModal.hide();
+							})
+							
+							return;
+						}
+						button.find('span').text(response.items.likeCount);
+						button.find('img').attr("src", like);
+					}
+				})
+			} else {
+				$.ajax({
+					type: "delete",
+					url: "/rest/like",
+					data: {movieNo: movieNo},
+					datType: "json",
+					success: function(response) {
+						button.find('span').text(response.items.likeCount);
+						button.find('img').attr("src", unlike);
+					}
+				})
+			}
+		});
+    </script>
+```

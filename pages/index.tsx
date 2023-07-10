@@ -28,7 +28,7 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
             blog description
           </p>
         </div> */}
-        <div className="mx-auto grid max-w-xl grid-cols-1 justify-between gap-y-20 lg:max-w-none lg:grid-cols-2">
+        <div className="mx-auto grid max-w-xl grid-cols-1 justify-between lg:gap-y-20 lg:max-w-none lg:grid-cols-2">
           <PostCard post={posts} />
           <FeaturedProjects />
         </div>

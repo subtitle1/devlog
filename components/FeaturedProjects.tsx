@@ -22,7 +22,7 @@ export default function FeaturedProjects() {
           <div className="mt-5">
             <ol>
               {projectsData.map((data) => (
-                <motion.li variants={itemVariants} className="my-3" key={data.href}>
+                <motion.li variants={itemVariants} className="mt-6 mb-3" key={data.href}>
                   <dl className="mt-3 flex flex-auto flex-wrap gap-x-2">
                     <dd className="w-full flex-none text-sm font-medium text-zinc-900 dark:text-zinc-100">
                       <div className="flex items-center justify-between">

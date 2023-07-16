@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { formatDate } from 'pliny/utils/formatDate'
@@ -81,6 +83,8 @@ export default function ListLayout({
   const displayPosts =
     initialDisplayPosts.length > 0 && !searchValue ? initialDisplayPosts : filteredBlogPosts
 
+  const tags = [...new Set(posts.map((post) => post.tags).join('|').replaceAll(',', '|').split('|'))];
+  
   return (
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -115,6 +119,11 @@ export default function ListLayout({
             </svg>
           </div>
         </div>
+        <div className="flex flex-wrap py-8">
+          {tags.map((tag) => (
+            <Tag key={tag} text={tag} />
+          ))}
+        </div>  
         <MotionLayout>
           <ul>
             {!filteredBlogPosts.length && 'No posts found.'}

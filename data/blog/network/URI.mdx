@@ -1,0 +1,72 @@
+---
+title: URI와 URL의 차이
+date: '2023-07-16'
+tags: ['Network']
+draft: false
+summary: 'URI, URL, URN'
+---
+
+## URI, URL의 차이 🤔
+
+URI는 `Uniform Resource Identifier`의 약자로, 이름처럼 **자원의 정보를 식별**하는 것이다. 이와 비슷한 용어로  URL(Resource Locator)와 URN(Resource Name)를 많이 들어봤을 텐데, URI는 이 두 가지를 모두 포함하는 개념이다.
+
+![image](https://github.com/subtitle1/devlog/assets/87356533/b927bcc5-5392-4ed9-8634-99863006422f)
+
+**URI**
+
+- **U**niform: 리소스를 식별하는 통일된 방식
+- **R**esource: 자원, URI로 식별할 수 있는 모든 것 (Html, 실시간 교통 정보, 사진 등등 제한 없음)
+- **I**dentifier: 다른 항목과 구분하는 데 필요한 정보
+
+**URL**
+
+- **L**ocator: 자원이 있는 위치를 지정하는 것
+
+**URN**
+
+- **N**ame: 리소스에 이름을 부여
+
+위치는 변할 수 있지만, 이름은 변하지 않는다. URN, 즉 이름만으로 실제 리소스를 찾을 수 있는 방법은 보편화되어 있지 않다. 
+
+---
+
+## URL 문법 확인해 보기 🔍
+
+```jsx
+https://www.google.com/search?q=hello&hl=ko
+```
+
+위와 같은 url이 있다고 가정해 보자. 이를 표로 쪼개 보면 아래와 같은데, 순서대로 프로토콜, 호스트명, 포트번호, 패스, 쿼리, 프래그먼트가 들어간다. 
+
+| scheme:// | host | [:port] | [path] | [?query] | [#fragment] |
+| --- | --- | --- | --- | --- | --- |
+| https:// | www.google.com | :433 | /search | ?q=hello&hl=ko  | |
+
+**프로토콜**
+
+- 프로토콜은 어떤 방식으로 자원에 접근할 것인가에 대한 일종의 규칙을 일컫는다. 예시로는 Http, Https, ftp 등이 있다. Https는 Http에 강력한 보안이 추가된 것이다.
+
+**호스트**
+
+- 호스트명을 의미하며, 보통 도메인명이나 IP 주소를 직접 입력해서 사용 가능하다.
+
+**포트**
+
+- 포트는 접속 포트이다. 일반적으로 생략하며, 생략 시 http는 주로 80 포트 https는 주로 443 포트를 사용한다. 하지만 특정 서버에 접속해야 하는 경우에는 입력하기도 한다.
+
+**path**
+
+- 리소스 경로를 의미하며, 계층적 구조를 가진다.
+
+    - 예시
+        - /home/image1.jpg
+        - /members
+        - /members/100, /phones/iphone14
+
+**query**
+- Query는 `key=value`의 형태로, **?로 시작**하고 **&로 추가** 가능하다. query parameter, query string으로 불리기도 하며 웹 서버에 제공하는 파라미터, 문자 형태이다.
+    - 예시 
+        - ```keyA=valueA&keyB=valueB```
+
+**fragment**
+- fragment는 html **내부 북마크** 등에 사용하는 정보로, html 내부에서 중간으로 이동하고 싶을 때 사용하는 것으로 이해하면 된다. 서버에 전송되는 정보는 아니다.

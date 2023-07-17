@@ -115,7 +115,7 @@ module.exports = {
                 color: theme('colors.pink.700'),
               },
               code: { color: theme('colors.primary.400') },
-              fontWeight: '800',
+              // fontWeight: '800',
             },
             h1: {
               fontWeight: '700',

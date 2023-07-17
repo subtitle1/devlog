@@ -10,6 +10,7 @@ import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import { motion } from "framer-motion"
 import MotionLayout from './MotionLayout'
+import TagText from '@/components/TagText'
 
 const itemVariants = {
   hidden: { opacity: 0, y: 10 },
@@ -35,7 +36,7 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
 
   return (
     <div className="space-y-2 pb-8 md:space-y-5">
-      <nav className="flex justify-between">
+      <nav id="pageNav" className="flex justify-between">
         {!prevPage && (
           <button className="cursor-auto disabled:opacity-50" disabled={!prevPage}>
             Previous
@@ -119,11 +120,11 @@ export default function ListLayout({
             </svg>
           </div>
         </div>
-        <div className="flex flex-wrap py-8">
+        {/* <div className="flex flex-wrap py-8">
           {tags.map((tag) => (
             <Tag key={tag} text={tag} />
           ))}
-        </div>  
+        </div>   */}
         <MotionLayout>
           <ul>
             {!filteredBlogPosts.length && 'No posts found.'}
@@ -131,31 +132,31 @@ export default function ListLayout({
               const { path, date, title, summary, tags } = post
               return (
                 <motion.li key={path} variants={itemVariants}  className="py-4">
-                  <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
-                    <dl>
-                      <dt className="sr-only">Published on</dt>
-                      <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                        <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
-                      </dd>
-                    </dl>
-                    <div className='space-y-3 xl:col-span-3 rounded-3xl p-7 hover:bg-gray-100 dark:hover:bg-gray-800'>
-                    <div>
-                      <Link href={`/${path}`}>
+                  <Link href={`/${path}`}>
+                    <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
+                      <dl>
+                        <dt className="sr-only">Published on</dt>
+                        <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
+                          <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
+                        </dd>
+                      </dl>
+                      <div className='space-y-3 xl:col-span-3 rounded-3xl p-7 hover:bg-gray-100 dark:hover:bg-gray-800'>
+                      <div>
                         <p className="relative text-justify text-lg font-bold leading-8 tracking-tight text-gray-900 dark:text-gray-100">
                           {title}
                         </p>
-                      </Link>
-                    </div>
-                    <div className="text-justify text-gray-500 dark:text-gray-400">
-                      {summary}
-                    </div>
-                      <div className="flex flex-wrap mt-2">
-                      {tags.map((tag) => (
-                        <Tag key={tag} text={tag} />
-                      ))}
+                      </div>
+                      <div className="text-justify text-gray-500 dark:text-gray-400">
+                        {summary}
+                      </div>
+                        <div className="flex flex-wrap mt-2">
+                        {tags.map((tag) => (
+                          <TagText key={tag} text={tag} />
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               </motion.li>
               )
             })}

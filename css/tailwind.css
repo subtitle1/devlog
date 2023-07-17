@@ -19,7 +19,11 @@
   } 
 }
 
-h1, h2, a, strong {
+#header, #pageNav a {
+  font-family: 'Pretendard-Bold';
+}
+
+h1, h2, strong {
   font-family: 'Pretendard-Bold';
 }
 

@@ -1,0 +1,165 @@
+---
+title: 테스트 케이스 작성 예시
+date: '2023-07-18'
+tags: ['Java']
+draft: false
+summary: 'JUnit으로 테스트 코드 작성하기'
+---
+
+## 테스트 케이스 
+개발한 기능을 실행해서 테스트 할 때 자바의 main 메서드를 통해서 실행하거나, 웹 애플리케이션의 컨트롤러를 통해서 해당 기능을 실행한다. 이러한 방법은 준비하고 실행하는데 오래 걸리고, 반복 실행하기 어렵고 여러 테스트를 한번에 실행하기 어렵다는 단점이 있다. 자바는 **JUnit**이라는 프레임워크로 테스트를 실행해서 이러한 문제를 해결한다.
+
+
+### 1. 멤버 객체 생성하기
+
+```java
+public class Member {
+    private Long id;
+    private String name;
+
+    // getter, setter 코드 생략
+}
+```
+
+---
+
+### 2. 멤버 리포지토리 인터페이스 생성하기
+
+```java
+import hello.hellospring.domain.Member;
+import java.util.List;
+import java.util.Optional;
+
+public interface MemberRepository {
+    Member save(Member member);
+    Optional<Member> findById(Long id);
+    Optional<Member> findByName(String name);
+    List<Member> findAll();
+}
+```
+
+---
+
+### 3. 멤버 리포지토리 메모리 구현체 생성하기
+
+```java
+import hello.hellospring.domain.Member;
+import java.util.*;
+
+public class MemoryMemberRepository implements MemberRepository{
+    /* 동시성 문제가 고려되어 있지 않음, 실무에서는 ConcurrentHashMap, AtomicLong 사용 고려 */
+    private static Map<Long, Member> store = new HashMap<>();
+    private static long sequence = 0L;
+
+    @Override
+    public Member save(Member member) {
+        member.setId(++sequence);
+        store.put(member.getId(), member);
+        return member;
+    }
+
+    @Override
+    public Optional<Member> findById(Long id) {
+        return Optional.ofNullable(store.get(id));
+    }
+
+    @Override
+    public Optional<Member> findByName(String name) {
+        return store.values().stream()
+                .filter(member -> member.getName().equals(name))
+                .findAny();
+    }
+
+    @Override
+    public List<Member> findAll() {
+        return new ArrayList<>(store.values());
+    }
+
+    /* 테스트 케이스가 끝날 때마다 실행할 메소드 */
+    public void clearStore() {
+        store.clear();
+    }
+}
+```
+
+---
+
+### 4. 테스트 케이스 작성해 보기
+![image](https://github.com/subtitle1/subtitle1/assets/87356533/f633c512-ff16-466e-a689-151dfbf99b61)
+
+프로젝트 소스 폴더 하위에는 main 패키지와 test 패키지가 존재하는데, 보통 테스트 케이스는 사진과 같이 Repository 뒤에 Test를 붙이는 것이 관례이다. 코드는 아래와 같다.
+
+```java {10-11} showLineNumbers
+import hello.hellospring.domain.Member;
+import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+
+class MemoryMemberRepositoryTest {
+
+    MemoryMemberRepository repository = new MemoryMemberRepository();
+
+    @AfterEach
+    public void afterEach() {
+        repository.clearStore();
+    }
+
+    @Test
+    public void save() {
+        Member member = new Member();
+        member.setName("devtella");
+
+        repository.save(member);
+
+        Member result = repository.findById(member.getId()).get();
+        assertThat(member).isEqualTo(result);
+    }
+
+    @Test
+    public void findByName() {
+        Member member1 = new Member();
+        member1.setName("devtella1");
+        repository.save(member1);
+
+        Member member2 = new Member();
+        member2.setName("devtella2");
+        repository.save(member2);
+
+        Member result = repository.findByName("devtella1").get();
+
+        assertThat(result).isEqualTo(member2);
+    }
+
+    @Test
+    public void findAll() {
+        Member member1 = new Member();
+        member1.setName("devtella1");
+        repository.save(member1);
+
+        Member member2 = new Member();
+        member2.setName("devtella2");
+        repository.save(member2);
+
+        List<Member> result = repository.findAll();
+
+        assertThat(result.size()).isEqualTo(2);
+    }
+}
+```
+
+> 🔍 **Assertions**
+> 
+> 테스트가 원하는 결과를 리턴하는지, 에러는 발생하지 않는지를 확인할 때 사용할 수 있는 jUnit이 제공하는 정적 객체이다.
+
+Assertions은 static으로 import가 가능해서 **메소드명(assertThat)만으로도 사용이 가능**하다. 첫번째 테스트 케이스는 정상적으로 구동되는 케이스이고, 두번째 테스트 케이스는 일부러 오류가 발생하도록 작성했다.
+
+- 오류 발생 시 콘솔 
+![image](https://github.com/subtitle1/subtitle1/assets/87356533/d51d1e35-b321-4e7f-9358-70179624d198)
+
+---
+
+### @AfterEach
+해당 어노테이션이 명시된 메소드는 **테스트 메소드 실행 후**에 무조건 실행된다. 테스트는 서로 의존관계 없이, 순서에 상관없이 설계가 되어야 한다. 하나의 테스트가 끝날 때마다 공용 데이터를 지워주는 작업을 수행해야 문제없이 테스트가 진행되기 때문에 그런 경우에 사용하는 어노테이션이다. 
+
+---
+
+혼자서 하는 개발이라면 테스트코드의 의미가 크지 않을 수도 있지만, 많은 인원끼리 개발 시에는 몇 만 라인, 몇 십만 라인이 넘어가는 경우도 생긴다. 그때 테스트 코드를 작성하지 않으면 정말 많은 문제가 생길 수도 있으니 테스트 코드 작성하는 것을 습관화하도록 하자!

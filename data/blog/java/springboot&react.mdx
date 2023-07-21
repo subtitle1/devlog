@@ -3,8 +3,10 @@ title: SpringBoot와 React 연동
 date: '2023-07-21'
 tags: ['Java', 'SpringBoot', 'React']
 draft: false
-summary: '그리고 mysql까지 연동해 보기'
+summary: '그리고 mysql 의존성 설정까지!'
 ---
+
+👉🏻 [참고블로그](https://velog.io/@u-nij/Spring-Boot-React.js-%EA%B0%9C%EB%B0%9C%ED%99%98%EA%B2%BD-%EC%84%B8%ED%8C%85)
 
 ## 개발환경
 - MySQL 8.0.34
@@ -79,7 +81,7 @@ java.lang.classnotfoundexception: com.mysql.cj.jdbc.driver at java.base/jdk.inte
 ```
 
 ![image](https://github.com/subtitle1/subtitle1/assets/87356533/bf7c5d92-a8e4-4f04-a085-78c7f9dbcea9)
-[스프링 공식문서]( https://docs.spring.io/spring-boot/docs/3.0.5/reference/html/dependency-versions.html#appendix.dependency-versions.coordinates)에서 확인해 보니 groupid 및 artifactId가 변경된 것! 
+[스프링 공식문서]( https://docs.spring.io/spring-boot/docs/3.0.5/reference/html/dependency-versions.html#appendix.dependency-versions.coordinates)에서 확인해 보니 groupId 및 artifactId가 변경된 것! 
 
 아래와 같이 바꿔주니까 연동 잘 된다~
 
@@ -101,5 +103,4 @@ spring.jpa.show-sql=true
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.format_sql=true
 ```
-
 

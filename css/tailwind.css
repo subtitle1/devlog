@@ -19,7 +19,7 @@
   } 
 }
 
-#header, #pageNav, .mdx, .route a {
+#header, #pageNav, .mdx a, .route a {
   font-family: 'Pretendard-Bold';
 }
 
